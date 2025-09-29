@@ -5,7 +5,7 @@ from typing import List, Literal
 from pydantic import BaseModel, Field
 
 
-# Request coming to /submit (you can use this or keep your inline model)
+# Request submit
 class SubmissionRequest(BaseModel):
     username: str = Field(..., min_length=1, max_length=64)
     code: str = Field(..., min_length=1)
@@ -99,3 +99,4 @@ def grade_response_from_grader(username: str, raw: dict) -> GradeResponse:
         status=status,
         details=GradeDetails(public=public_items, hidden=hidden_items),
     )
+
