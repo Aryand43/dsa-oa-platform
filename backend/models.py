@@ -11,7 +11,7 @@ class SubmissionRequest(BaseModel):
     code: str = Field(..., min_length=1)
 
 
-# Grader result shapes (optional but useful for validation)
+# Grader result shapes
 class TestCasePublicResult(BaseModel):
     input: str
     expected: str
@@ -47,7 +47,7 @@ class LeaderboardEntry(BaseModel):
 class LeaderboardResponse(BaseModel):
     entries: List[LeaderboardEntry]
 
-# --- Helpers to build GradeResponse from raw grader dict ---
+# GradeResponse 
 
 def _calc_status(passed: int, total: int, had_runtime: bool, had_tle: bool) -> OverallStatus:
     if had_tle:
@@ -72,7 +72,7 @@ def grade_response_from_grader(username: str, raw: dict) -> GradeResponse:
         "hidden": [{"output": "...", "passed": bool}, ...]
       }
     """
-    # Build details (validate against the Pydantic models)
+    # Build details
     public_items = [TestCasePublicResult(**tc) for tc in raw.get("public", [])]
     hidden_items = [TestCaseHiddenResult(**tc) for tc in raw.get("hidden", [])]
 
@@ -99,4 +99,5 @@ def grade_response_from_grader(username: str, raw: dict) -> GradeResponse:
         status=status,
         details=GradeDetails(public=public_items, hidden=hidden_items),
     )
+
 
