@@ -8,7 +8,7 @@ const SubmitPage = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post('http://localhost:8000/submit', {
+      const res = await axios.post('/submit', {
         username,
         code
       });
