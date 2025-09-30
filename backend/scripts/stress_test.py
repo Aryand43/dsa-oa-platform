@@ -2,8 +2,8 @@
 import asyncio
 import random
 import httpx
-
-URL = "http://127.0.0.1:8000"
+import os
+URL = os.getenv("OA_URL", "http://127.0.0.1:8080")
 
 # Wrong code 
 WRONG_CODE = "print(5)"
