@@ -1,9 +1,11 @@
-# backend/server.py
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from backend.grader import grade_submission
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 app = FastAPI()
 
@@ -15,11 +17,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- NEW: serve frontend build if present ---
+frontend_path = os.getenv("FRONTEND_DIST", "frontend_dist")
+if os.path.exists(frontend_path):
+    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+
+    @app.get("/")
+    def serve_index():
+        return FileResponse(os.path.join(frontend_path, "index.html"))
+
+# --- your existing code ---
 class Submission(BaseModel):
     username: str
-    code: str  # Code content from user
+    code: str
 
-@app.get("/")
+@app.get("/ping")
 def read_root():
     return {"msg": "NTU OA backend is live."}
 
