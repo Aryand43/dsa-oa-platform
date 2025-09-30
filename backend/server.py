@@ -17,10 +17,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- NEW: serve frontend build if present ---
 frontend_path = os.getenv("FRONTEND_DIST", "frontend_dist")
 if os.path.exists(frontend_path):
-    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="frontend")
 
     @app.get("/")
     def serve_index():
