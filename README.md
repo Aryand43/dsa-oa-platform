@@ -1,8 +1,8 @@
 # NTU OA Platform
 
-A Replit-based Online Assessment (OA) system designed for Coding Nights, a technical event hosted by IEEE NTU and Women in Tech.
+A Replit-integrated Online Assessment (OA) system built for Coding Nights, a technical event hosted by IEEE NTU and Women in Tech.
 
-This platform allows users to write code inside Replit, submit it via an API, automatically evaluate it against test cases, and view rankings on a leaderboard.
+The platform allows users to submit code, evaluate it against test cases, and view scores on a leaderboard.
 
 ## Directory Structure
 
@@ -10,26 +10,30 @@ This platform allows users to write code inside Replit, submit it via an API, au
 aryand43-dsa-oa-platform/
 ├── README.md
 ├── requirements.txt
+├── Dockerfile
+├── frontend/                  # Vite + React client
+│   ├── index.html
+│   ├── src/
+│   └── ...
 ├── boilerplate/
-│   ├── main.py              # User-facing solve() scaffold
-│   └── test_cases.json      # Public and hidden test cases
+│   ├── main.py                # User-facing solve() scaffold
+│   └── test_cases.json        # Public + hidden test cases
 └── backend/
-    ├── server.py            # FastAPI API server (handles /submit)
-    ├── grader.py            # Evaluates user code safely using exec()
-    ├── leaderboard.py       # (To be implemented) Tracks user scores
-    └── models.py            # (Optional) Pydantic schemas
+    ├── server.py              # FastAPI app (API + static frontend)
+    ├── grader.py              # Executes user code using exec()
+    ├── leaderboard.py         # (WIP) Tracks scores + rankings
+    └── models.py              # Optional Pydantic schemas
 ```
 
-## Features (So Far)
+## Features
 
-* Accepts user code and username via POST `/submit`
-* Grades the code using predefined test cases
-* Supports public and hidden test cases
-* Logs submissions and scores (to be implemented)
-* Displays real-time leaderboard (to be implemented)
-* Stress test support for Replit backend (planned)
+* Code submission via `/submit` endpoint
+* Grading with public and hidden test cases
+* Controlled code execution using `exec()`
+* Dockerized backend and frontend
+* Leaderboard logic (WIP)
 
-## Setup
+## Quickstart
 
 Install dependencies:
 
@@ -37,27 +41,36 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Run the FastAPI server:
+Run backend server:
 
 ```
 uvicorn backend.server:app --reload
 ```
 
+Run full stack with Docker:
+
+```
+docker build -t dsa-oa-backend .
+docker run -p 8000:8000 dsa-oa-backend
+```
+
+Visit: [http://localhost:8000](http://localhost:8000)
+
 ## Sample POST Request
 
 ```
 POST /submit
+Content-Type: application/json
+
 {
   "username": "john_doe",
   "code": "def solve():\n    print('Hello')\n\nif __name__ == '__main__':\n    solve()"
 }
 ```
 
-## Work In Progress
-
-This repository is under active development. Expect regular updates as we add:
+## Roadmap
 
 * Full leaderboard logic
-* Docker-based sandboxing
+* Docker-based code sandboxing
 * Test case randomization
 * Replit UI integration
