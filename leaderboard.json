@@ -1,10 +1,10 @@
 [
   {
-    "submission_id": "c09422bb-3354-4920-b3dd-c9f2a3f9ea94",
+    "submission_id": "76eae610-9798-4ba3-91e8-215f40a0229c",
     "user_id": "aryan123",
-    "problem_id": "contains-duplicate",
-    "score": 2,
-    "replay_result": "passed",
-    "timestamp": "2025-10-01 02:01:44.397025"
+    "problem_id": "elimination-game",
+    "score": 1,
+    "replay_result": "1/10 tests passed",
+    "timestamp": "2025-10-01T20:30:58.946608"
   }
 ]

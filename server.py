@@ -40,6 +40,7 @@ async def submit_code(submission: Submission):
     with open(test_case_path, "r") as f:
         test_data = json.load(f)
 
+    '''
     # combine public + hidden tests into one list for grading
     all_tests = test_data.get("public_tests", []) + test_data.get("hidden_tests", [])
 
@@ -55,7 +56,7 @@ async def submit_code(submission: Submission):
             for i, case in enumerate(all_tests)
         ]
     }
-
+    '''
     # grade submission
     result = grade_submission(
         code=submission.code,
@@ -64,14 +65,9 @@ async def submit_code(submission: Submission):
     )
 
     # add to leaderboard
-    submission_entry = {
-        "submission_id": str(uuid.uuid4()),
-        "user_id": submission.user_id,
-        "problem_id": submission.problem_id,
-        "score": result["score"],
-        "replay_result": f"{result['passed']}/{result['total']} tests passed",
-        "timestamp": datetime.now().isoformat()
-    }
+    submission_entry = result["submission_entry"]
+    submission_entry["replay_result"] = f"{result['score']}/{result['total']} tests passed"
+    submission_entry["timestamp"] = datetime.now().isoformat()
 
     global submissions
     # update leaderboard (replace if better)
