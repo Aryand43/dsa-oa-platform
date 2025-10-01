@@ -1,0 +1,43 @@
+{
+  "problem_id": "regex-matching",
+  "public_tests": [
+    {
+      "input": "aa\na\n",
+      "expected_output": "False\n"
+    },
+    {
+      "input": "aa\na*\n",
+      "expected_output": "True\n"
+    },
+    {
+      "input": "ab\n.*\n",
+      "expected_output": "True\n"
+    }
+  ],
+  "hidden_tests": [
+    {
+      "input": "mississippi\nmis*is*p*.\n",
+      "expected_output": "False\n"
+    },
+    {
+      "input": "mississippi\nmis*is*ip*.\n",
+      "expected_output": "True\n"
+    },
+    {
+      "input": "aab\nc*a*b\n",
+      "expected_output": "True\n"
+    },
+    {
+      "input": "aaa\na*a\n",
+      "expected_output": "True\n"
+    },
+    {
+      "input": "aaa\na*a*a\n",
+      "expected_output": "True\n"
+    },
+    {
+      "input": "abcd\n.*d\n",
+      "expected_output": "True\n"
+    }
+  ]
+}

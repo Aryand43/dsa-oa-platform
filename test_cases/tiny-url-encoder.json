@@ -1,0 +1,23 @@
+{
+  "problem_id": "tiny-url-encoder",
+  "public_tests": [
+    {
+      "input": "\"https://leetcode.com/problems/design-tinyurl\"\n",
+      "expected_output": "\"https://leetcode.com/problems/design-tinyurl\"\n"
+    }
+  ],
+  "hidden_tests": [
+    {
+      "input": "\"https://example.com/\"\n",
+      "expected_output": "\"https://example.com/\"\n"
+    },
+    {
+      "input": "\"https://openai.com/research/\"\n",
+      "expected_output": "\"https://openai.com/research/\"\n"
+    },
+    {
+      "input": "\"https://github.com/aryand43\"\n",
+      "expected_output": "\"https://github.com/aryand43\"\n"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "problem_id": "front-middle-back-queue",
+  "public_tests": [
+    {
+      "input": "[\"FrontMiddleBackQueue\", \"pushFront\", \"pushBack\", \"pushMiddle\", \"pushMiddle\", \"popFront\", \"popMiddle\", \"popMiddle\", \"popBack\", \"popFront\"]\n[[], [1], [2], [3], [4], [], [], [], [], []]\n",
+      "expected_output": "[null, null, null, null, null, 1, 3, 4, 2, -1]\n"
+    }
+  ],
+  "hidden_tests": [
+    {
+      "input": "[\"FrontMiddleBackQueue\", \"pushBack\", \"pushBack\", \"popMiddle\", \"pushFront\", \"popMiddle\", \"popBack\"]\n[[], [10], [20], [], [5], [], []]\n",
+      "expected_output": "[null, null, null, 10, null, 5, 20]\n"
+    },
+    {
+      "input": "[\"FrontMiddleBackQueue\", \"pushMiddle\", \"popMiddle\", \"popFront\", \"popBack\"]\n[[], [42], [], [], []]\n",
+      "expected_output": "[null, null, 42, -1, -1]\n"
+    }
+  ]
+}

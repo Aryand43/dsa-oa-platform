@@ -1,0 +1,19 @@
+{
+  "problem_id": "stack-using-queues",
+  "public_tests": [
+    {
+      "input": "[\"MyStack\", \"push\", \"push\", \"top\", \"pop\", \"empty\"]\n[[], [1], [2], [], [], []]\n",
+      "expected_output": "[null, null, null, 2, 2, false]\n"
+    }
+  ],
+  "hidden_tests": [
+    {
+      "input": "[\"MyStack\", \"empty\", \"push\", \"top\", \"pop\", \"empty\"]\n[[], [], [42], [], [], []]\n",
+      "expected_output": "[null, true, null, 42, 42, true]\n"
+    },
+    {
+      "input": "[\"MyStack\", \"push\", \"push\", \"push\", \"pop\", \"top\"]\n[[], [10], [20], [30], [], []]\n",
+      "expected_output": "[null, null, null, null, 30, 20]\n"
+    }
+  ]
+}

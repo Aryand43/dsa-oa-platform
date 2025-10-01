@@ -1,0 +1,23 @@
+{
+  "problem_id": "three-sum",
+  "public_tests": [
+    {
+      "input": "6\n-1 0 1 2 -1 -4\n",
+      "expected_output": "[-1, -1, 2]\n[-1, 0, 1]\n"
+    },
+    {
+      "input": "3\n0 1 1\n",
+      "expected_output": "[]\n"
+    }
+  ],
+  "hidden_tests": [
+    {
+      "input": "3\n0 0 0\n",
+      "expected_output": "[0, 0, 0]\n"
+    },
+    {
+      "input": "5\n3 -2 1 0 -1\n",
+      "expected_output": "[-2, 1, 1]\n[-1, 0, 1]\n"
+    }
+  ]
+}

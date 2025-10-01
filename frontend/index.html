@@ -4,27 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Leaderboard</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <h1>🏆 Live Leaderboard</h1>
+    <button id="darkToggle" class="toggle-btn">🌙 Toggle Dark Mode</button>
     <table id="leaderboard">
       <thead>
         <tr>
-          <th>#</th>
+          <th>Rank</th>
           <th>User</th>
           <th>Score</th>
           <th>Result</th>
-          <th>Submitted At</th>
+          <th>Timestamp</th>
         </tr>
       </thead>
-      <tbody>
-        <!-- Rows inserted by JS -->
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 
+  <!-- Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <!-- Main Script -->
   <script src="script.js"></script>
 </body>
 </html>
