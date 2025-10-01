@@ -32,34 +32,64 @@ class Submission(BaseModel):
 
 @app.post("/submit")
 async def submit_code(submission: Submission):
+    # locate test_cases/<problem_id>.json
+    test_case_path = os.path.join("test_cases", f"{submission.problem_id}.json")
+    if not os.path.exists(test_case_path):
+        raise HTTPException(status_code=404, detail="Problem test cases not found")
+
+    with open(test_case_path, "r") as f:
+        test_data = json.load(f)
+
+    # combine public + hidden tests into one list for grading
+    all_tests = test_data.get("public_tests", []) + test_data.get("hidden_tests", [])
+
+    # restructure for grader.py
+    prepared_data = {
+        "question": submission.problem_id.replace("-", "_"),  # match function name in code
+        "test_cases": [
+            {
+                "test_case_id": i + 1,
+                "input": {"raw_input": case["input"]},  # you can adjust how input is passed
+                "expected_output": case["expected_output"].strip()
+            }
+            for i, case in enumerate(all_tests)
+        ]
+    }
+
+    # grade submission
     result = grade_submission(
-    code=submission.code,
-    problem_id=submission.problem_id,
-    user_id=submission.user_id
+        code=submission.code,
+        problem_id=submission.problem_id,
+        user_id=submission.user_id
     )
+
+    # add to leaderboard
+    submission_entry = {
+        "submission_id": str(uuid.uuid4()),
+        "user_id": submission.user_id,
+        "problem_id": submission.problem_id,
+        "score": result["score"],
+        "replay_result": f"{result['passed']}/{result['total']} tests passed",
+        "timestamp": datetime.now().isoformat()
+    }
 
     global submissions
+    # update leaderboard (replace if better)
+    existing = next((entry for entry in submissions
+                     if entry["user_id"] == submission.user_id and entry["problem_id"] == submission.problem_id), None)
 
-    # Find existing submission for the same user and problem
-    existing = next(
-        (entry for entry in submissions
-        if entry["user_id"] == submission.user_id and entry["problem_id"] == submission.problem_id),
-        None
-    )
-
-    # Replace only if the new score is higher
     if existing:
-        if result["submission_entry"]["score"] > existing["score"]:
-            submissions = [entry for entry in submissions if entry != existing]
-            submissions.append(result["submission_entry"])
-        else:
-            pass  # keep the old higher score
+        if submission_entry["score"] > existing["score"]:
+            submissions = [s for s in submissions if s != existing]
+            submissions.append(submission_entry)
     else:
-        submissions.append(result["submission_entry"])
+        submissions.append(submission_entry)
 
-    # Save to leaderboard.json
     with open("leaderboard.json", "w") as f:
         json.dump(submissions, f, indent=2, default=str)
+
+    return {"grade": result, "leaderboard_entry": submission_entry}
+
 
 @app.get("/leaderboard")
 async def get_leaderboard():
@@ -94,7 +124,7 @@ def list_problems():
             try:
                 with open(f"test_cases/{file}", "r") as f:
                     data = json.load(f)
-                    if "test_cases" in data:
+                if "public_tests" in data or "hidden_tests" in data:
                         problems.append(file.replace(".json", ""))
             except Exception as e:
                 continue  # skip invalid JSON files
