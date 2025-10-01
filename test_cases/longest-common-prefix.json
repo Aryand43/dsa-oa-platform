@@ -8,16 +8,40 @@
     {
       "input": "3\ndog racecar car\n",
       "expected_output": "\n"
+    },
+    {
+      "input": "3\ninterspecies interstellar interstate\n",
+      "expected_output": "inters\n"
+    },
+    {
+      "input": "2\nthrone throne\n",
+      "expected_output": "throne\n"
+    },
+    {
+      "input": "1\na\n",
+      "expected_output": "a\n"
     }
   ],
   "hidden_tests": [
     {
-      "input": "4\ninterspecies interstellar interstate internet\n",
-      "expected_output": "inter\n"
+      "input": "2\n b\n",
+      "expected_output": "\n"
     },
     {
-      "input": "2\na a\n",
-      "expected_output": "a\n"
+      "input": "0\n\n",
+      "expected_output": "\n"
+    },
+    {
+      "input": "2\nprefix \n",
+      "expected_output": "\n"
+    },
+    {
+      "input": "3\nabc abcd abcde\n",
+      "expected_output": "abc\n"
+    },
+    {
+      "input": "3\nc acc ccc\n",
+      "expected_output": "\n"
     }
   ]
 }

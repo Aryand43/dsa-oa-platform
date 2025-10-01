@@ -4,70 +4,51 @@ import json
 import uuid
 from datetime import datetime
 
-def grade_submission(code: str, problem_id: str, user_id: str) -> dict:
-    # Load test cases from file
-    try:
-        with open(f"test_cases/{problem_id}.json", "r") as f:
-            test_data = json.load(f)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Test cases for '{problem_id}' not found.")
-
+def grade_submission(user_code: str, test_data: dict):
+    question = test_data["question"]
     test_cases = test_data["test_cases"]
-    total_cases = len(test_cases)
-    passed_count = 0
+
+    # Build the namespace for execution
+    namespace = {}
+    try:
+        exec(user_code, namespace)
+    except Exception as e:
+        return {"error": f"Code execution failed: {e}", "score": 0}
+
+    passed = 0
+    total = len(test_cases)
+    results = []
 
     for case in test_cases:
-        with tempfile.NamedTemporaryFile(mode='w+', suffix='.py', delete=False) as tmp:
-            # Inject user code and input/output redirection logic
-            tmp.write(code + "\n")
-            tmp.write(f"""
-if __name__ == "__main__":
-    import sys
-    from io import StringIO
+        test_case_id = case.get("test_case_id", None)
+        input_data = case["input"]
+        expected_output = case["expected_output"]
 
-    input_data = '''{case['input']}'''
-    sys.stdin = StringIO(input_data)
+        try:
+            # Dynamically call the function with unpacked input
+            result = namespace[question](**input_data)
+            passed_test = result == expected_output
+        except Exception as e:
+            result = f"Error: {e}"
+            passed_test = False
 
-    solve()
-""")
-            tmp.flush()
+        if passed_test:
+            passed += 1
 
-            try:
-                result = subprocess.run(
-                    ["python", tmp.name],
-                    capture_output=True,
-                    text=True,
-                    timeout=2
-                )
-                user_output = result.stdout.strip()
-                expected_output = case["expected_output"].strip()
+        results.append({
+            "test_case_id": test_case_id,
+            "input": input_data,
+            "expected_output": expected_output,
+            "actual_output": result,
+            "passed": passed_test
+        })
 
-                if user_output == expected_output:
-                    passed_count += 1
-            except subprocess.TimeoutExpired:
-                continue  # skip on timeout
-
-    # Determine result label
-    if passed_count == total_cases:
-        replay_result = "passed"
-    elif passed_count > 0:
-        replay_result = "partially"
-    else:
-        replay_result = "failed"
-
-    # Construct leaderboard submission entry
-    submission_entry = {
-        "submission_id": str(uuid.uuid4()),
-        "user_id": user_id,
-        "problem_id": problem_id,
-        "score": passed_count,
-        "replay_result": replay_result,
-        "timestamp": datetime.utcnow()
-    }
+    score = int((passed / total) * 100)
 
     return {
-        "score": passed_count,
-        "total": total_cases,
-        "replay_result": replay_result,
-        "submission_entry": submission_entry
+        "question": question,
+        "score": score,
+        "passed": passed,
+        "total": total,
+        "results": results
     }
