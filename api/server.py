@@ -4,27 +4,26 @@ from pydantic import BaseModel
 from typing import List, Dict
 from datetime import datetime
 import uuid
-from grader import grade_submission
+import sys
 import os
-import json
+
+# Add parent directory to path to import grader
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from grader import grade_submission
 
 app = FastAPI()
 
-# Add API prefix for Vercel deployment
-@app.get("/")
-async def root():
-    return {"message": "Coding Challenge API is running!"}
-
 # Load existing submissions from file
-if os.path.exists("leaderboard.json"):
-    with open("leaderboard.json", "r") as f:
+leaderboard_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "leaderboard.json")
+if os.path.exists(leaderboard_file):
+    with open(leaderboard_file, "r") as f:
         submissions = json.load(f)
 else:
     submissions = []
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # allow all origins for dev
+    allow_origins=["*"],  # allow all origins for deployment
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -34,33 +33,20 @@ class Submission(BaseModel):
     problem_id: str
     code: str
 
+@app.get("/")
+async def root():
+    return {"message": "Coding Challenge API is running!"}
+
 @app.post("/submit")
 async def submit_code(submission: Submission):
     # locate test_cases/<problem_id>.json
-    test_case_path = os.path.join(os.path.dirname(__file__), "test_cases", f"{submission.problem_id}.json")
+    test_case_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_cases", f"{submission.problem_id}.json")
     if not os.path.exists(test_case_path):
         raise HTTPException(status_code=404, detail="Problem test cases not found")
 
     with open(test_case_path, "r") as f:
         test_data = json.load(f)
 
-    '''
-    # combine public + hidden tests into one list for grading
-    all_tests = test_data.get("public_tests", []) + test_data.get("hidden_tests", [])
-
-    # restructure for grader.py
-    prepared_data = {
-        "question": submission.problem_id.replace("-", "_"),  # match function name in code
-        "test_cases": [
-            {
-                "test_case_id": i + 1,
-                "input": {"raw_input": case["input"]},  # you can adjust how input is passed
-                "expected_output": case["expected_output"].strip()
-            }
-            for i, case in enumerate(all_tests)
-        ]
-    }
-    '''
     # grade submission
     result = grade_submission(
         code=submission.code,
@@ -85,7 +71,7 @@ async def submit_code(submission: Submission):
     else:
         submissions.append(submission_entry)
 
-    with open("leaderboard.json", "w") as f:
+    with open(leaderboard_file, "w") as f:
         json.dump(submissions, f, indent=2, default=str)
 
     return {"grade": result, "leaderboard_entry": submission_entry}
@@ -119,10 +105,11 @@ async def get_leaderboard():
 @app.get("/problems")
 def list_problems():
     problems = []
-    for file in os.listdir("test_cases"):
+    test_cases_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_cases")
+    for file in os.listdir(test_cases_dir):
         if file.endswith(".json"):
             try:
-                with open(f"test_cases/{file}", "r") as f:
+                with open(os.path.join(test_cases_dir, file), "r") as f:
                     data = json.load(f)
                 if "public_tests" in data or "hidden_tests" in data:
                         problems.append(file.replace(".json", ""))
@@ -134,7 +121,7 @@ def list_problems():
 def get_problem_details(problem_id: str):
     """Get detailed information about a specific problem"""
     try:
-        test_case_path = os.path.join("test_cases", f"{problem_id}.json")
+        test_case_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "test_cases", f"{problem_id}.json")
         if not os.path.exists(test_case_path):
             raise HTTPException(status_code=404, detail="Problem not found")
         
@@ -150,22 +137,5 @@ def get_problem_details(problem_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error loading problem: {str(e)}")
 
-@app.get("/problem/{problem_id}")
-def get_problem_details(problem_id: str):
-    """Get detailed information about a specific problem"""
-    try:
-        test_case_path = os.path.join("test_cases", f"{problem_id}.json")
-        if not os.path.exists(test_case_path):
-            raise HTTPException(status_code=404, detail="Problem not found")
-        
-        with open(test_case_path, "r") as f:
-            problem_data = json.load(f)
-        
-        return {
-            "problem_id": problem_id,
-            "public_tests": problem_data.get("public_tests", []),
-            "hidden_tests_count": len(problem_data.get("hidden_tests", [])),
-            "total_tests": len(problem_data.get("public_tests", [])) + len(problem_data.get("hidden_tests", []))
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error loading problem: {str(e)}")
+# For Vercel deployment
+app = app

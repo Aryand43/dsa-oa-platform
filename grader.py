@@ -2,6 +2,7 @@ import subprocess
 import tempfile
 import json
 import uuid
+import os
 from datetime import datetime
 
 def grade_submission(code: str, problem_id: str, user_id: str):
@@ -14,11 +15,15 @@ def grade_submission(code: str, problem_id: str, user_id: str):
     all_tests = test_data.get("public_tests", []) + test_data.get("hidden_tests", [])
     total_cases = len(all_tests)
     passed_count = 0
+    error_details = []
 
-    for case in all_tests:
-        with tempfile.NamedTemporaryFile(mode='w+', suffix='.py', delete=False) as tmp:
-            tmp.write(code + "\n")
-            tmp.write("""
+    for i, case in enumerate(all_tests):
+        tmp_file = None
+        try:
+            with tempfile.NamedTemporaryFile(mode='w+', suffix='.py', delete=False) as tmp:
+                tmp_file = tmp.name
+                tmp.write(code + "\n")
+                tmp.write("""
 if __name__ == "__main__":
     import sys
     from io import StringIO
@@ -28,22 +33,42 @@ if __name__ == "__main__":
 
     solve()
 """.format(case["input"]))
-            tmp.flush()
+                tmp.flush()
 
             try:
                 result = subprocess.run(
-                    ["python", tmp.name],
+                    ["python", tmp_file],
                     capture_output=True,
                     text=True,
-                    timeout=2
+                    timeout=5  # Increased timeout to 5 seconds
                 )
+                
+                if result.returncode != 0:
+                    error_details.append(f"Test {i+1}: Runtime error - {result.stderr.strip()}")
+                    continue
+                
                 user_output = result.stdout.strip()
                 expected_output = case["expected_output"].strip()
 
                 if user_output == expected_output:
                     passed_count += 1
+                else:
+                    error_details.append(f"Test {i+1}: Expected '{expected_output}', got '{user_output}'")
+                    
             except subprocess.TimeoutExpired:
+                error_details.append(f"Test {i+1}: Timeout (exceeded 5 seconds)")
                 continue
+            except Exception as e:
+                error_details.append(f"Test {i+1}: Execution error - {str(e)}")
+                continue
+                
+        finally:
+            # Clean up temporary file
+            if tmp_file and os.path.exists(tmp_file):
+                try:
+                    os.unlink(tmp_file)
+                except OSError:
+                    pass
 
     replay_result = "passed" if passed_count == total_cases else (
         "partially" if passed_count > 0 else "failed"
@@ -55,12 +80,14 @@ if __name__ == "__main__":
         "problem_id": problem_id,
         "score": passed_count,
         "replay_result": replay_result,
-        "timestamp": datetime.utcnow()
+        "timestamp": datetime.utcnow(),
+        "error_details": error_details[:3]  # Limit to first 3 errors for brevity
     }
 
     return {
         "score": passed_count,
         "total": total_cases,
         "replay_result": replay_result,
-        "submission_entry": submission_entry
+        "submission_entry": submission_entry,
+        "error_details": error_details[:5]  # Return some error details for debugging
     }

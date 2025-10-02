@@ -73,3 +73,46 @@ body.dark .toggle-btn {
   background: #333;
   color: #eee;
 }
+
+/* Challenge Button */
+.challenge-btn {
+  display: inline-block;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  padding: 1rem 2rem;
+  text-decoration: none;
+  border-radius: 25px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.challenge-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.leaderboard-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.leaderboard-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+body.dark .leaderboard-link {
+  color: #a8b3ff;
+}
+
+body.dark .leaderboard-link:hover {
+  color: #c9d1ff;
+}
+
+.hidden {
+  display: none !important;
+}
